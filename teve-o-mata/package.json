@@ -1,0 +1,27 @@
+{
+  "name": "teve-o-mata",
+  "version": "1.0.0",
+  "description": "Teveclub autómata etető és tanító, pushbullet integrációval.",
+  "main": "index.js",
+  "private": true,
+  "scripts": {
+    "dev": "cross-env NODE_ENV=development node ./src/index.js | bunyan -L",
+    "prod": "cross-env NODE_ENV=production node ./src/index.js"
+  },
+  "author": "GerA",
+  "license": "ISC",
+  "dependencies": {
+    "bluebird": "^3.4.7",
+    "bunyan": "^1.8.5",
+    "cheerio": "^0.22.0",
+    "config": "^1.25.1",
+    "cross-env": "^3.1.4",
+    "lodash": "^4.17.4",
+    "pushbullet": "^2.0.0",
+    "qs-iconv": "^1.0.4",
+    "request": "^2.79.0"
+  },
+  "devDependencies": {
+    "eslint": "^3.15.0"
+  }
+}
