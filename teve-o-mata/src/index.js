@@ -36,16 +36,35 @@ _.map(teveList, (teve) => {
   }).spread((response, body) => {
     const $ = cheerio.load(body)
     if ($('select').length > 2) {
-      return pusher.noteAsync(null, 'Teve-o-mata', `Válassz új trükköt ${teve.login} tevédnek!`)
+      return false
     }
     return teveclubRestClient.postAsync('/tanit.pet', {
       form: {
         farmdoit: 'tanit',
         learn: 'Tanulj teve!',
       },
+    }).then(() => {
+      return true
     })
-  }).then(() => {
-    return pusher.noteAsync(null, 'Teve-o-mata', `${teve.login} tanítva és megetetve!`)
+  }).then((tanitva) => {
+    if (tanitva) {
+      return teveclubRestClient.getAsync('/tanit.pet').spread((response, body) => {
+        const $ = cheerio.load(body)
+        const leckekRawText = $('tr:nth-child(1) > td > font > b > div').text()
+        const leckekMatches = leckekRawText.match(new RegExp('(\\d+)[^\\d]+Ebb.l tev.d m.r[^\\d]+(\\d+)'))
+        const osszesLecke = _.get(leckekMatches, 1)
+        const megtanultLecke = _.get(leckekMatches, 2)
+        const trukk = $('tr:nth-child(1) > td > font > b > div > span:nth-child(2)').text()
+        const tanulasProgressInfo = (() => {
+          if (megtanultLecke && osszesLecke) {
+            return ` (${trukk}: ${megtanultLecke}/${osszesLecke})`
+          }
+          return ''
+        })()
+        return pusher.noteAsync(null, 'Teve-o-mata', `${teve.login} megetetve és tanítva.${tanulasProgressInfo}`)
+      })
+    }
+    return pusher.noteAsync(null, 'Teve-o-mata', `${teve.login} megetetve. Válassz új trükköt neki!`)
   }).catch((err) => {
     log.error(err)
     return pusher.noteAsync(null, 'Teve-o-mata', err)
