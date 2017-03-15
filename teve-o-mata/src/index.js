@@ -1,4 +1,3 @@
-const _ = require('lodash')
 const Promise = require('bluebird')
 const Pushbullet = require('pushbullet')
 const config = require('config')
@@ -36,10 +35,11 @@ function feed(teveclubRestClient) {
   })
 }
 
-function continueTeaching(teveclubRestClient) {
+function teach(teveclubRestClient) {
   return teveclubRestClient.getAsync('/tanit.pet').spread((response, body) => {
     const $ = cheerio.load(body)
-    if ($('select').length > 2) {
+    if ($('select[name="tudomany"]').length) {
+      // TODO start teaching new trick automatically
       return false
     }
     return teveclubRestClient.postAsync('/tanit.pet', {
@@ -56,24 +56,18 @@ function continueTeaching(teveclubRestClient) {
 function pushTeachingInfo(teveclubRestClient, teve) {
   return teveclubRestClient.getAsync('/tanit.pet').spread((response, body) => {
     const $ = cheerio.load(body)
-    const leckekRawText = $('tr:nth-child(1) > td > font > b > div').text()
-    const leckekMatches = leckekRawText.match(new RegExp('(\\d+)[^\\d]+Ebb.l tev.d m.r[^\\d]+(\\d+)'))
-    const osszesLecke = _.get(leckekMatches, 1)
-    const megtanultLecke = _.get(leckekMatches, 2)
-    const trukk = $('tr:nth-child(1) > td > font > b > div > span:nth-child(2)').text()
-    const tanulasProgressInfo = (() => {
-      if (megtanultLecke && osszesLecke) {
-        return ` (${trukk}: ${megtanultLecke}/${osszesLecke})`
+    const teachingInfoText = $('tr:nth-child(1) > td > font > b > div').text()
+    const teachingInfoMatches = teachingInfoText.match(new RegExp('(\\d+)[^\\d]+Ebb.l tev.d m.r[^\\d]+(\\d+)'))
+    const teachingProgressText = (() => {
+      const [, allLessons, knownLessons] = teachingInfoMatches || []
+      if (allLessons && knownLessons) {
+        const trickText = $('tr:nth-child(1) > td > font > b > div > span:nth-child(2)').text()
+        return `(${trickText}: ${knownLessons}/${allLessons})`
       }
-      return ' Holnap új trükköt tanulhat!'
+      return 'Holnap új trükköt tanulhat!'
     })()
-    return pusher.noteAsync(null, 'Teve-o-mata', `${teve.login} megetetve és tanítva.${tanulasProgressInfo}`)
+    return pusher.noteAsync(null, 'Teve-o-mata', `${teve.login} megetetve és tanítva. ${teachingProgressText}`)
   })
-}
-
-function startNewTeaching(teveclubRestClient, teve) {
-  // TODO choose new trick automatically
-  return pusher.noteAsync(null, 'Teve-o-mata', `${teve.login} megetetve. Válassz új trükköt neki!`)
 }
 
 return Promise.map(teveList, (teve) => {
@@ -84,12 +78,12 @@ return Promise.map(teveList, (teve) => {
   }).then(() => {
     return feed(teveclubRestClient)
   }).then(() => {
-    return continueTeaching(teveclubRestClient)
+    return teach(teveclubRestClient)
   }).then((isTeachingSuccessful) => {
     if (isTeachingSuccessful) {
       return pushTeachingInfo(teveclubRestClient, teve)
     }
-    return startNewTeaching(teveclubRestClient, teve)
+    return pusher.noteAsync(null, 'Teve-o-mata', `${teve.login} megetetve. Válassz új trükköt neki!`)
   })
 }).catch((err) => {
   log.error(err)
