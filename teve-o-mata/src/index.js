@@ -1,3 +1,4 @@
+const _ = require('lodash')
 const Promise = require('bluebird')
 const Pushbullet = require('pushbullet')
 const config = require('config')
@@ -6,10 +7,9 @@ const log = require('./log')
 const TeveclubRestClient = require('./teveclub-client')
 
 const pusher = Promise.promisifyAll(new Pushbullet(config.get('pushbullet.apiKey')))
-
 const teveList = config.get('teveclub')
 
-function init(teveclubRestClient) {
+function initSession(teveclubRestClient) {
   return teveclubRestClient.getAsync('/')
 }
 
@@ -38,17 +38,28 @@ function feed(teveclubRestClient) {
 function teach(teveclubRestClient) {
   return teveclubRestClient.getAsync('/tanit.pet').spread((response, body) => {
     const $ = cheerio.load(body)
-    if ($('select[name="tudomany"]').length) {
-      // TODO start teaching new trick automatically
-      return false
+    if ($('select[name="tudomany"]').length) { // select new trick to learn
+      const tricks = $('select[name="tudomany"] option').map((index, element) => {
+        const [, lessons] = $(element).text().match(/\((\d+) lecke\)/)
+        return {
+          value: $(element).prop('value'),
+          lessons: _.toInteger(lessons),
+        }
+      }).get()
+      const trickWithMinimumLessons = _.minBy(tricks, 'lessons')
+      return teveclubRestClient.postAsync('/tanit.pet', {
+        form: {
+          tudomany: _.get(trickWithMinimumLessons, 'value'),
+          learn: 'Tanulj teve!',
+        },
+      })
     }
+    // continue learning the trick
     return teveclubRestClient.postAsync('/tanit.pet', {
       form: {
         farmdoit: 'tanit',
         learn: 'Tanulj teve!',
       },
-    }).then(() => {
-      return true
     })
   })
 }
@@ -57,7 +68,7 @@ function pushTeachingInfo(teveclubRestClient, teve) {
   return teveclubRestClient.getAsync('/tanit.pet').spread((response, body) => {
     const $ = cheerio.load(body)
     const teachingInfoText = $('tr:nth-child(1) > td > font > b > div').text()
-    const teachingInfoMatches = teachingInfoText.match(new RegExp('(\\d+)[^\\d]+Ebb.l tev.d m.r[^\\d]+(\\d+)'))
+    const teachingInfoMatches = teachingInfoText.match(/(\d+)[^\d]+Ebb.l tev.d m.r[^\d]+(\d+)/)
     const teachingProgressText = (() => {
       const [, allLessons, knownLessons] = teachingInfoMatches || []
       if (allLessons && knownLessons) {
@@ -70,22 +81,21 @@ function pushTeachingInfo(teveclubRestClient, teve) {
   })
 }
 
+function handleError(err) {
+  log.error(err)
+  return pusher.noteAsync(null, 'Teve-o-mata', err)
+}
+
 return Promise.map(teveList, (teve) => {
   const teveclubRestClient = new TeveclubRestClient()
 
-  return init(teveclubRestClient).then(() => {
+  return initSession(teveclubRestClient).then(() => {
     return login(teveclubRestClient, teve)
   }).then(() => {
     return feed(teveclubRestClient)
   }).then(() => {
     return teach(teveclubRestClient)
-  }).then((isTeachingSuccessful) => {
-    if (isTeachingSuccessful) {
-      return pushTeachingInfo(teveclubRestClient, teve)
-    }
-    return pusher.noteAsync(null, 'Teve-o-mata', `${teve.login} megetetve. Válassz új trükköt neki!`)
+  }).then(() => {
+    return pushTeachingInfo(teveclubRestClient, teve)
   })
-}).catch((err) => {
-  log.error(err)
-  return pusher.noteAsync(null, 'Teve-o-mata', err)
-})
+}).catch(handleError)
