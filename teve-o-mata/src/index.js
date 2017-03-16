@@ -83,7 +83,7 @@ function pushTeachingInfo(teveclubRestClient, teve) {
 
 function handleError(err) {
   log.error(err)
-  return pusher.noteAsync(null, 'Teve-o-mata', err)
+  return pusher.noteAsync(null, 'Teve-o-mata', _.toString(err))
 }
 
 return Promise.map(teveList, (teve) => {
