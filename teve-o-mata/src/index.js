@@ -40,7 +40,7 @@ function teach(teveclubRestClient) {
     const $ = cheerio.load(body)
     if ($('select[name="tudomany"]').length) { // select new trick to learn
       const tricks = $('select[name="tudomany"] option').map((index, element) => {
-        const [, lessons] = $(element).text().match(/\((\d+) lecke\)/)
+        const [, lessons] = $(element).text().match(/\((\d+) lecke \)/)
         return {
           value: $(element).prop('value'),
           lessons: _.toInteger(lessons),
