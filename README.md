@@ -28,3 +28,9 @@ You can get a Pushbullet access token on your account settings page: https://www
 npm install
 npm run prod
 ```
+
+You may create a cron job to run the application every day:
+
+```
+0 10 * * * cd /usr/local/teve-o-mata && npm run prod > /dev/null 2>&1
+```
