@@ -2,6 +2,7 @@ const _ = require('lodash')
 const request = require('request')
 const Promise = require('bluebird')
 const encoder = require('qs-iconv/encoder')
+const iconv = require('iconv-lite')
 const log = require('./log')
 
 class TeveclubRestClient {
@@ -19,6 +20,7 @@ class TeveclubRestClient {
         Referer: 'http://teveclub.hu',
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36',
       },
+      encoding: null,
     }), {multiArgs: true})
   }
 
@@ -48,7 +50,8 @@ class TeveclubRestClient {
   getAsync(path, options) {
     return this.requestWithConfiguration.getAsync(encodeURI(path), options)
       .spread((response, body) => {
-        return this.handleHttpErrorCodes(response, body, options, 'GET', path)
+        const bodyDecoded = iconv.decode(body, 'CP1252')
+        return this.handleHttpErrorCodes(response, bodyDecoded, options, 'GET', path)
       })
       .catch(this.logTimeoutFunction(path))
   }
@@ -56,7 +59,8 @@ class TeveclubRestClient {
   postAsync(path, options) {
     return this.requestWithConfiguration.postAsync(encodeURI(path), options)
       .spread((response, body) => {
-        return this.handleHttpErrorCodes(response, body, options, 'POST', path)
+        const bodyDecoded = iconv.decode(body, 'CP1252')
+        return this.handleHttpErrorCodes(response, bodyDecoded, options, 'POST', path)
       })
       .catch(this.logTimeoutFunction(path))
   }
