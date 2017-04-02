@@ -64,6 +64,15 @@ function teach(teveclubRestClient) {
   })
 }
 
+function play(teveclubRestClient) {
+  return teveclubRestClient.postAsync('/egyszam.pet', {
+    form: {
+      honnan: Math.floor(Math.random() * 500) + 1,
+      tipp: 'Ez a tippem!',
+    },
+  })
+}
+
 function pushTeachingInfo(teveclubRestClient, teve) {
   return teveclubRestClient.getAsync('/tanit.pet').spread((response, body) => {
     const $ = cheerio.load(body)
@@ -95,6 +104,8 @@ return Promise.map(teveList, (teve) => {
     return feed(teveclubRestClient)
   }).then(() => {
     return teach(teveclubRestClient)
+  }).then(() => {
+    return play(teveclubRestClient)
   }).then(() => {
     return pushTeachingInfo(teveclubRestClient, teve)
   })
