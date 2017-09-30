@@ -10,14 +10,14 @@ class TeveclubRestClient {
   constructor() {
     this.requestWithConfiguration = Promise.promisifyAll(request.defaults({
       jar: true,
-      baseUrl: 'http://teveclub.hu',
+      baseUrl: 'https://teveclub.hu',
       userQuerystring: false,
       qsStringifyOptions: { encoder: encoder('CP1252') },
       followAllRedirects: true,
       forever: true,
       headers: {
-        Origin: 'http://teveclub.hu',
-        Referer: 'http://teveclub.hu',
+        Origin: 'https://teveclub.hu',
+        Referer: 'https://teveclub.hu',
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36',
       },
       encoding: null,
