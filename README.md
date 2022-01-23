@@ -4,20 +4,12 @@ An application that automatically feeds and teaches your camels on Teveclub.hu (
 
 ## Configuration
 
-Edit your production.json5 file according to the example below.
+Create a `.env` file based on the following template:
 
-```json5
-{
-  pushbullet: {
-    apiKey: "<YOUR_PUSHBULLET_ACCESS_TOKEN>",
-  },
-  teveclub: [
-    {
-      login: "<LOGIN>",
-      password: "<PASSWORD>",
-    },
-  ],
-}
+```dotenv
+PUSHBULLET_API_KEY=
+LOGIN=
+PASSWORD=
 ```
 
 You can get a Pushbullet access token on your account settings page: https://www.pushbullet.com/#settings/account
@@ -26,11 +18,8 @@ You can get a Pushbullet access token on your account settings page: https://www
 
 ```sh
 npm install
-npm run prod
+npm run start
 ```
 
-You may create a cron job to run the application every day:
+It will trigger on start and then once every day while the application is running.
 
-```
-0 10 * * * cd /usr/local/teve-o-mata && npm run prod > /dev/null 2>&1
-```

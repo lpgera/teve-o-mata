@@ -3,7 +3,6 @@ const request = require('request')
 const Promise = require('bluebird')
 const encoder = require('qs-iconv/encoder')
 const iconv = require('iconv-lite')
-const log = require('./log')
 
 class TeveclubRestClient {
 
@@ -25,11 +24,11 @@ class TeveclubRestClient {
   }
 
   handleHttpErrorCodes(response, body, options, method, path) {
-    log.debug(`Received statusCode ${response.statusCode} while invoking ${method} ${path}`)
+    console.log(`Received statusCode ${response.statusCode} while invoking ${method} ${path}`)
     if (response.statusCode >= 400 && !_.get(options, 'ignoreHttpErrors', false)) {
       const message = `Received status code ${response.statusCode} while invoking ${method} ${this.baseUrl}${path}.` +
       ` Response body: ${JSON.stringify(body, null, 2)}.`
-      log.error(message)
+      console.error(message)
       return Promise.reject(new Error(message, response.statusCode))
     }
     return [response, body]
@@ -38,10 +37,10 @@ class TeveclubRestClient {
   logTimeoutFunction(path) {
     return (err) => {
       if (err.code === 'ETIMEDOUT') {
-        log.error(`Connection timed out. URL: ${this.baseUrl}${path}`)
+        console.error(`Connection timed out. URL: ${this.baseUrl}${path}`)
       }
       if (err.code === 'ESOCKETTIMEDOUT') {
-        log.error(`Socket timed out. URL: ${this.baseUrl}${path}`)
+        console.error(`Socket timed out. URL: ${this.baseUrl}${path}`)
       }
       throw err
     }

@@ -1,23 +1,29 @@
+require('dotenv').config()
+
 const _ = require('lodash')
 const Promise = require('bluebird')
 const Pushbullet = require('pushbullet')
-const config = require('config')
 const cheerio = require('cheerio')
-const log = require('./log')
 const TeveclubRestClient = require('./teveclub-client')
+const CronJob = require('cron').CronJob
 
-const pusher = Promise.promisifyAll(new Pushbullet(config.get('pushbullet.apiKey')))
-const teveList = config.get('teveclub')
+const pusher = Promise.promisifyAll(new Pushbullet(process.env.PUSHBULLET_API_KEY))
+if (!process.env.LOGIN) {
+  throw new Error('process.env.LOGIN is undefined')
+}
+if (!process.env.PASSWORD) {
+  throw new Error('process.env.PASSWORD is undefined')
+}
 
 function initSession(teveclubRestClient) {
   return teveclubRestClient.getAsync('/')
 }
 
-function login(teveclubRestClient, teve) {
+function login(teveclubRestClient) {
   return teveclubRestClient.postAsync('/', {
     form: {
-      tevenev: teve.login,
-      pass: teve.password,
+      tevenev: process.env.LOGIN,
+      pass: process.env.PASSWORD,
       x: '34',
       y: '33',
       login: 'Gyere!',
@@ -73,7 +79,7 @@ function play(teveclubRestClient) {
   })
 }
 
-function pushTeachingInfo(teveclubRestClient, teve) {
+function pushTeachingInfo(teveclubRestClient) {
   return teveclubRestClient.getAsync('/tanit.pet').spread((response, body) => {
     const $ = cheerio.load(body)
     const teachingInfoText = $('tr:nth-child(1) > td > font > b > div').text()
@@ -86,20 +92,20 @@ function pushTeachingInfo(teveclubRestClient, teve) {
       }
       return 'Holnap új trükköt tanulhat!'
     })()
-    return pusher.noteAsync(null, 'Teve-o-mata', `${teve.login} megetetve és tanítva. ${teachingProgressText}`)
+    return pusher.noteAsync(null, 'Teve-o-mata', `${process.env.LOGIN} megetetve és tanítva. ${teachingProgressText}`)
   })
 }
 
 function handleError(err) {
-  log.error(err)
+  console.error(err)
   return pusher.noteAsync(null, 'Teve-o-mata', _.toString(err))
 }
 
-return Promise.map(teveList, (teve) => {
+function run() {
   const teveclubRestClient = new TeveclubRestClient()
 
   return initSession(teveclubRestClient).then(() => {
-    return login(teveclubRestClient, teve)
+    return login(teveclubRestClient)
   }).then(() => {
     return feed(teveclubRestClient)
   }).then(() => {
@@ -107,6 +113,11 @@ return Promise.map(teveList, (teve) => {
   }).then(() => {
     return play(teveclubRestClient)
   }).then(() => {
-    return pushTeachingInfo(teveclubRestClient, teve)
-  })
-}).catch(handleError)
+    return pushTeachingInfo(teveclubRestClient)
+  }).catch(handleError)
+}
+
+const runOnInit = true
+const start = true
+
+new CronJob(process.env.CRON_CONFIG || '0 0 5 * * *', run, null, start, null, null, runOnInit)
