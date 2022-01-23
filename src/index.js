@@ -120,4 +120,8 @@ function run() {
 const runOnInit = true
 const start = true
 
-new CronJob(process.env.CRON_CONFIG || '0 0 5 * * *', run, null, start, null, null, runOnInit)
+const job = new CronJob(process.env.CRON_CONFIG || '0 0 5 * * *', run, null, start, null, null, runOnInit)
+
+process.on('SIGINT', () => {
+  job.stop()
+})
