@@ -16,10 +16,13 @@ You can get a Pushbullet access token on your account settings page: https://www
 
 ## Running the application
 
-```sh
-npm install
-npm run start
+```bash
+docker run \
+  --detach \
+  --env-file .env \
+  --restart unless-stopped \
+  --name teve-o-mata \
+  ghcr.io/lpgera/teve-o-mata:master
 ```
 
 It will trigger on start and then once every day while the application is running.
-
