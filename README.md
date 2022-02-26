@@ -22,7 +22,7 @@ docker run \
   --env-file .env \
   --restart unless-stopped \
   --name teve-o-mata \
-  ghcr.io/lpgera/teve-o-mata:master
+  ghcr.io/lpgera/teve-o-mata
 ```
 
 It will trigger on start and then once every day while the application is running.
