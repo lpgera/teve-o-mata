@@ -1,69 +1,94 @@
-const _ = require('lodash')
-const request = require('request')
-const Promise = require('bluebird')
-const encoder = require('qs-iconv/encoder')
 const iconv = require('iconv-lite')
+const querystring = require('querystring')
+const qsIconv = require('qs-iconv')
 
-class TeveclubRestClient {
+module.exports = () => {
+  const baseUrl = 'https://teveclub.hu'
+  const headers = {
+    Origin: baseUrl,
+    Referer: baseUrl,
+    'User-agent': 'Mozilla/5.0 (Linux; Android 12; NE2213) AppleWebKit/537.36 (KHTML, like Gecko) ' +
+      'Chrome/100.0.4896.127 Mobile Safari/537.36',
+  }
+  let sessionCookie = null
 
-  constructor() {
-    this.requestWithConfiguration = Promise.promisifyAll(request.defaults({
-      jar: true,
-      baseUrl: 'https://teveclub.hu',
-      userQuerystring: false,
-      qsStringifyOptions: { encoder: encoder('CP1252') },
-      followAllRedirects: true,
-      forever: true,
+  const url = (path) => new URL(path, baseUrl).toString()
+
+  const formData = (object) => querystring.stringify(object, null, null, {encodeURIComponent: qsIconv.encoder('CP1252')})
+
+  const login = async ({ tevenev, pass }) => {
+    const response = await fetch(url('/'), {
+      method: 'POST',
+      redirect: 'manual',
       headers: {
-        Origin: 'https://teveclub.hu',
-        Referer: 'https://teveclub.hu',
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36',
+        ...headers,
+        'Content-type': 'application/x-www-form-urlencoded',
       },
-      encoding: null,
-    }), {multiArgs: true})
-  }
+      body: formData({
+        tevenev,
+        pass,
+        x: '34',
+        y: '33',
+        login: 'Gyere!',
+      }),
+    })
 
-  handleHttpErrorCodes(response, body, options, method, path) {
-    console.log(`Received statusCode ${response.statusCode} while invoking ${method} ${path}`)
-    if (response.statusCode >= 400 && !_.get(options, 'ignoreHttpErrors', false)) {
-      const message = `Received status code ${response.statusCode} while invoking ${method} ${this.baseUrl}${path}.` +
-      ` Response body: ${JSON.stringify(body, null, 2)}.`
-      console.error(message)
-      return Promise.reject(new Error(message, response.statusCode))
+    if (!/myteve\.pet/.test(response.headers.get('Location'))) {
+      throw new Error('Login was unsuccessful')
     }
-    return [response, body]
-  }
 
-  logTimeoutFunction(path) {
-    return (err) => {
-      if (err.code === 'ETIMEDOUT') {
-        console.error(`Connection timed out. URL: ${this.baseUrl}${path}`)
-      }
-      if (err.code === 'ESOCKETTIMEDOUT') {
-        console.error(`Socket timed out. URL: ${this.baseUrl}${path}`)
-      }
-      throw err
+    const [,match] = response.headers.get('Set-cookie').match(/(SESSION_ID=.*);/)
+    if (!match) {
+      throw new Error('Could not retrieve session ID')
     }
+    sessionCookie = match
+
+    const responseBuffer = Buffer.from(await response.arrayBuffer())
+
+    return iconv.decode(responseBuffer, 'CP1252')
   }
 
-  getAsync(path, options) {
-    return this.requestWithConfiguration.getAsync(encodeURI(path), options)
-      .spread((response, body) => {
-        const bodyDecoded = iconv.decode(body, 'CP1252')
-        return this.handleHttpErrorCodes(response, bodyDecoded, options, 'GET', path)
-      })
-      .catch(this.logTimeoutFunction(path))
+  const get = async ({ path }) => {
+    const response = await fetch(url(path), {
+      method: 'GET',
+      headers: {
+        ...headers,
+        Cookie: sessionCookie,
+      },
+    })
+
+    if (!response.ok) {
+      throw new Error(`GET ${url(path)} failed: ${response.status} ${response.statusText}`)
+    }
+
+    const responseBuffer = Buffer.from(await response.arrayBuffer())
+
+    return iconv.decode(responseBuffer, 'CP1252')
   }
 
-  postAsync(path, options) {
-    return this.requestWithConfiguration.postAsync(encodeURI(path), options)
-      .spread((response, body) => {
-        const bodyDecoded = iconv.decode(body, 'CP1252')
-        return this.handleHttpErrorCodes(response, bodyDecoded, options, 'POST', path)
-      })
-      .catch(this.logTimeoutFunction(path))
+  const post = async ({ path, data }) => {
+    const response = await fetch(url(path), {
+      method: 'POST',
+      headers: {
+        ...headers,
+        Cookie: sessionCookie,
+        'Content-type': 'application/x-www-form-urlencoded',
+      },
+      body: formData(data),
+    })
+
+    if (!response.ok) {
+      throw new Error(`POST ${url(path)} failed: ${response.status} ${response.statusText}`)
+    }
+
+    const responseBuffer = Buffer.from(await response.arrayBuffer())
+
+    return iconv.decode(responseBuffer, 'CP1252')
   }
 
+  return {
+    login,
+    get,
+    post,
+  }
 }
-
-module.exports = TeveclubRestClient
