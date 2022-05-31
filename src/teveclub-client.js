@@ -1,8 +1,8 @@
-const iconv = require('iconv-lite')
-const querystring = require('querystring')
-const qsIconv = require('qs-iconv')
+import iconv from 'iconv-lite'
+import querystring from 'querystring'
+import qsIconv from 'qs-iconv'
 
-module.exports = () => {
+export default () => {
   const baseUrl = 'https://teveclub.hu'
   const headers = {
     Origin: baseUrl,

@@ -1,4 +1,4 @@
-module.exports = async (message) => {
+export default async (message) => {
   const response = await fetch('https://api.pushbullet.com/v2/pushes', {
     method: 'POST',
     headers: {

@@ -6,6 +6,7 @@
     "node": "^18.0.0",
     "npm": "^8.5.0"
   },
+  "type": "module",
   "scripts": {
     "start": "node ./src/index.js",
     "lint": "eslint src/**"

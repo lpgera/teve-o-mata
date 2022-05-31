@@ -1,4 +1,9 @@
-require('dotenv').config()
+import 'dotenv/config'
+import _ from 'lodash'
+import cheerio from 'cheerio'
+import { CronJob } from 'cron'
+import pusher from './pushbullet.js'
+import TeveclubClient from './teveclub-client.js'
 
 if (!process.env.PUSHBULLET_API_KEY) {
   throw new Error('process.env.PUSHBULLET_API_KEY is undefined')
@@ -9,12 +14,6 @@ if (!process.env.LOGIN) {
 if (!process.env.PASSWORD) {
   throw new Error('process.env.PASSWORD is undefined')
 }
-
-const _ = require('lodash')
-const cheerio = require('cheerio')
-const pusher = require('./pushbullet')
-const TeveclubClient = require('./teveclub-client')
-const CronJob = require('cron').CronJob
 
 async function feed(teveclubClient) {
   await teveclubClient.post({ path: '/myteve.pet', data: {
