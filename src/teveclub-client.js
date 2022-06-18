@@ -10,6 +10,7 @@ export default () => {
     'User-agent': 'Mozilla/5.0 (Linux; Android 12; NE2213) AppleWebKit/537.36 (KHTML, like Gecko) ' +
       'Chrome/100.0.4896.127 Mobile Safari/537.36',
   }
+  let sessionCookie = null
 
   const url = (path) => new URL(path, baseUrl).toString()
 
@@ -36,6 +37,12 @@ export default () => {
       throw new Error('Login was unsuccessful')
     }
 
+    const [,match] = response.headers.get('Set-cookie').match(/(SESSION_ID=.*);/)
+    if (!match) {
+      throw new Error('Could not retrieve session ID')
+    }
+    sessionCookie = match
+
     const responseBuffer = Buffer.from(await response.arrayBuffer())
 
     return iconv.decode(responseBuffer, 'CP1252')
@@ -44,7 +51,10 @@ export default () => {
   const get = async ({ path }) => {
     const response = await fetch(url(path), {
       method: 'GET',
-      headers,
+      headers: {
+        ...headers,
+        Cookie: sessionCookie,
+      },
     })
 
     if (!response.ok) {
@@ -61,6 +71,7 @@ export default () => {
       method: 'POST',
       headers: {
         ...headers,
+        Cookie: sessionCookie,
         'Content-type': 'application/x-www-form-urlencoded',
       },
       body: formData(data),
