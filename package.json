@@ -14,14 +14,14 @@
   "author": "lpgera",
   "license": "MIT",
   "dependencies": {
-    "cheerio": "^1.0.0-rc.11",
-    "cron": "^2.0.0",
-    "dotenv": "^16.0.1",
+    "cheerio": "^1.0.0-rc.12",
+    "cron": "^2.1.0",
+    "dotenv": "^16.0.3",
     "iconv-lite": "^0.6.3",
     "lodash": "^4.17.21",
     "qs-iconv": "^1.0.4"
   },
   "devDependencies": {
-    "eslint": "^8.18.0"
+    "eslint": "^8.25.0"
   }
 }
