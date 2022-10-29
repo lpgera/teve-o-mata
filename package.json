@@ -3,8 +3,8 @@
   "version": "1.0.0",
   "description": "An application which automatically feeds your virtual camel on Teveclub.hu.",
   "engines": {
-    "node": "^18.0.0",
-    "npm": "^8.5.0"
+    "node": "^19.0.0",
+    "npm": "^8.19.2"
   },
   "type": "module",
   "scripts": {
@@ -22,6 +22,6 @@
     "qs-iconv": "^1.0.4"
   },
   "devDependencies": {
-    "eslint": "^8.25.0"
+    "eslint": "^8.26.0"
   }
 }
