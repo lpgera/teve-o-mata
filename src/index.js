@@ -1,6 +1,6 @@
 import 'dotenv/config'
 import _ from 'lodash'
-import cheerio from 'cheerio'
+import * as cheerio from 'cheerio'
 import { CronJob } from 'cron'
 import pusher from './pushbullet.js'
 import TeveclubClient from './teveclub-client.js'
