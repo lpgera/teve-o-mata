@@ -18,7 +18,7 @@
   "license": "MIT",
   "dependencies": {
     "cheerio": "^1.0.0-rc.12",
-    "cron": "^2.4.1",
+    "cron": "^2.4.3",
     "dotenv": "^16.3.1",
     "iconv-lite": "^0.6.3",
     "lodash": "^4.17.21",
