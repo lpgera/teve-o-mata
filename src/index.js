@@ -2,11 +2,11 @@ import 'dotenv/config'
 import _ from 'lodash'
 import * as cheerio from 'cheerio'
 import { CronJob } from 'cron'
-import pusher from './pushbullet.js'
+import ntfy from './ntfy.js'
 import TeveclubClient from './teveclub-client.js'
 
-if (!process.env.PUSHBULLET_API_KEY) {
-  throw new Error('process.env.PUSHBULLET_API_KEY is undefined')
+if (!process.env.NTFY_URL) {
+  throw new Error('process.env.NTFY_URL is undefined')
 }
 if (!process.env.LOGIN) {
   throw new Error('process.env.LOGIN is undefined')
@@ -72,7 +72,7 @@ async function pushTeachingInfo(teveclubClient) {
     return 'Holnap új trükköt tanulhat!'
   })()
 
-  await pusher(`${process.env.LOGIN} megetetve és tanítva. ${teachingProgressText}`)
+  await ntfy(`${process.env.LOGIN} megetetve és tanítva. ${teachingProgressText}`)
 }
 
 async function run() {
@@ -88,7 +88,7 @@ async function run() {
     await pushTeachingInfo(teveclubClient)
   } catch (error) {
     console.error(error)
-    await pusher(error.stack)
+    await ntfy(error.stack)
   }
 }
 
