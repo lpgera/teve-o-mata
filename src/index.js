@@ -1,4 +1,3 @@
-import 'dotenv/config'
 import _ from 'lodash'
 import * as cheerio from 'cheerio'
 import { CronJob } from 'cron'
