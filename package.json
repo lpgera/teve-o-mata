@@ -1,13 +1,13 @@
 {
   "name": "teve-o-mata",
   "version": "1.0.0",
-  "description": "An application which automatically feeds your virtual camel on Teveclub.hu.",
+  "description": "An application which automatically feeds your virtual camel on Teveclub.hu",
   "engines": {
     "node": "^21.0.0",
     "npm": ">10.0.0"
   },
   "volta": {
-    "node": "21.0.0"
+    "node": "21.7.3"
   },
   "type": "module",
   "scripts": {
@@ -24,6 +24,8 @@
     "qs-iconv": "^1.0.4"
   },
   "devDependencies": {
-    "eslint": "^9.0.0"
+    "@eslint/js": "^9.0.0",
+    "eslint": "^9.0.0",
+    "globals": "^15.0.0"
   }
 }
