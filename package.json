@@ -24,7 +24,7 @@
     "qs-iconv": "^1.0.4"
   },
   "devDependencies": {
-    "@eslint/js": "^9.4.0",
+    "@eslint/js": "^9.5.0",
     "eslint": "^9.4.0",
     "globals": "^15.4.0"
   }
