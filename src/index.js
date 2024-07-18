@@ -96,10 +96,9 @@ const start = true
 
 const job = new CronJob(process.env.CRON_CONFIG || '0 0 5 * * *', run, null, start, null, null, runOnInit)
 
-process.on('SIGINT', () => {
+const exitHandler = async (signal) => {
+  console.log(`Received ${signal}, exiting...`)
   job.stop()
-})
-
-process.on('uncaughtException', (error) => {
-  console.error(error)
-})
+}
+process.on('SIGINT', exitHandler)
+process.on('SIGTERM', exitHandler)
