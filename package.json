@@ -17,7 +17,7 @@
   "author": "lpgera",
   "license": "MIT",
   "dependencies": {
-    "cheerio": "^1.0.0-rc.12",
+    "cheerio": "^1.0.0",
     "cron": "^3.1.7",
     "iconv-lite": "^0.6.3",
     "lodash": "^4.17.21",
