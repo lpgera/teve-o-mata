@@ -1,20 +1,45 @@
-import iconv from 'iconv-lite'
-import querystring from 'querystring'
-import qsIconv from 'qs-iconv'
+const baseUrl = 'https://teveclub.hu'
+const headers = {
+  Origin: baseUrl,
+  Referer: baseUrl,
+}
+
+const decoder = new TextDecoder('iso-8859-1')
+
+const encodeObjectToIso8859FormData = object => {
+  const encodeIso8859 = string => {
+    const result = []
+    for (let i = 0; i < string.length; i++) {
+      const char = string.charCodeAt(i)
+      if (char < 128) {
+        if (char === 32) { // space
+          result.push('+')
+        } else if ((char >= 48 && char <= 57) || // 0-9
+          (char >= 65 && char <= 90) || // A-Z
+          (char >= 97 && char <= 122) || // a-z
+          char === 45 || char === 46 || char === 95 || char === 126) { // -._~
+          result.push(String.fromCharCode(char))
+        } else {
+          result.push('%' + char.toString(16).toUpperCase().padStart(2, '0'))
+        }
+      } else if (char <= 255) {
+        result.push('%' + char.toString(16).toUpperCase().padStart(2, '0'))
+      } else {
+        throw new Error(`Character out of iso-8859-1 range: ${char}`)
+      }
+    }
+    return result.join('')
+  }
+
+  return Object.entries(object)
+    .map(([key, value]) => `${encodeIso8859(key)}=${encodeIso8859(value)}`)
+    .join('&')
+}
+
+const url = path => new URL(path, baseUrl).toString()
 
 export default () => {
-  const baseUrl = 'https://teveclub.hu'
-  const headers = {
-    Origin: baseUrl,
-    Referer: baseUrl,
-    'User-agent': 'Mozilla/5.0 (Linux; Android 12; NE2213) AppleWebKit/537.36 (KHTML, like Gecko) ' +
-      'Chrome/100.0.4896.127 Mobile Safari/537.36',
-  }
   let sessionCookie = null
-
-  const url = (path) => new URL(path, baseUrl).toString()
-
-  const formData = (object) => querystring.stringify(object, null, null, {encodeURIComponent: qsIconv.encoder('CP1252')})
 
   const login = async ({ tevenev, pass }) => {
     const response = await fetch(url('/'), {
@@ -24,7 +49,7 @@ export default () => {
         ...headers,
         'Content-type': 'application/x-www-form-urlencoded',
       },
-      body: formData({
+      body: encodeObjectToIso8859FormData({
         tevenev,
         pass,
         x: '34',
@@ -43,9 +68,7 @@ export default () => {
     }
     sessionCookie = match
 
-    const responseBuffer = Buffer.from(await response.arrayBuffer())
-
-    return iconv.decode(responseBuffer, 'CP1252')
+    return decoder.decode(await response.arrayBuffer())
   }
 
   const get = async ({ path }) => {
@@ -61,9 +84,7 @@ export default () => {
       throw new Error(`GET ${url(path)} failed: ${response.status} ${response.statusText}`)
     }
 
-    const responseBuffer = Buffer.from(await response.arrayBuffer())
-
-    return iconv.decode(responseBuffer, 'CP1252')
+    return decoder.decode(await response.arrayBuffer())
   }
 
   const post = async ({ path, data }) => {
@@ -74,16 +95,14 @@ export default () => {
         Cookie: sessionCookie,
         'Content-type': 'application/x-www-form-urlencoded',
       },
-      body: formData(data),
+      body: encodeObjectToIso8859FormData(data),
     })
 
     if (!response.ok) {
       throw new Error(`POST ${url(path)} failed: ${response.status} ${response.statusText}`)
     }
 
-    const responseBuffer = Buffer.from(await response.arrayBuffer())
-
-    return iconv.decode(responseBuffer, 'CP1252')
+    return decoder.decode(await response.arrayBuffer())
   }
 
   return {

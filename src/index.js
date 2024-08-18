@@ -1,4 +1,3 @@
-import _ from 'lodash'
 import * as cheerio from 'cheerio'
 import { CronJob } from 'cron'
 import ntfy from './ntfy.js'
@@ -16,8 +15,8 @@ if (!process.env.PASSWORD) {
 
 async function feed(teveclubClient) {
   await teveclubClient.post({ path: '/myteve.pet', data: {
-    kaja: 1,
-    pia: 1,
+    kaja: '1',
+    pia: '1',
     etet: 'Mehet!',
   }})
 }
@@ -32,12 +31,12 @@ async function teach(teveclubClient) {
       const [, lessons] = $(element).text().match(/\((\d+) lecke \)/)
       return {
         value: $(element).prop('value'),
-        lessons: _.toInteger(lessons),
+        lessons: Number(lessons ?? Number.MAX_SAFE_INTEGER),
       }
     }).get()
-    const trickWithMinimumLessons = _.minBy(tricks, 'lessons')
+    const trickWithMinimumLessons = tricks.reduce((a, b) => a.lessons <= b.lessons ? a : b, {})
     await teveclubClient.post({ path: '/tanit.pet', data: {
-      tudomany: _.get(trickWithMinimumLessons, 'value'),
+      tudomany: trickWithMinimumLessons.value,
       learn: 'Tanulj teve!',
     }})
   } else {
@@ -51,7 +50,7 @@ async function teach(teveclubClient) {
 
 async function play(teveclubClient) {
   await teveclubClient.post({ path: '/egyszam.pet',data: {
-    honnan: Math.floor(Math.random() * 500) + 1,
+    honnan: String(Math.floor(Math.random() * 200) + 1),
     tipp: 'Ez a tippem!',
   }})
 }
