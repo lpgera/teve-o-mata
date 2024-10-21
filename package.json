@@ -11,18 +11,12 @@
   },
   "type": "module",
   "scripts": {
-    "start": "node --env-file=.env ./src/index.js",
-    "lint": "eslint src/**"
+    "start": "node --env-file=.env ./src/index.js"
   },
   "author": "lpgera",
   "license": "MIT",
   "dependencies": {
     "cheerio": "^1.0.0",
     "cron": "^3.1.7"
-  },
-  "devDependencies": {
-    "@eslint/js": "^9.10.0",
-    "eslint": "^9.12.0",
-    "globals": "^15.11.0"
   }
 }

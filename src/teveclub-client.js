@@ -62,7 +62,7 @@ export default () => {
       throw new Error('Login was unsuccessful')
     }
 
-    const [,match] = response.headers.get('Set-cookie').match(/(SESSION_ID=.*);/)
+    const [, match] = response.headers.get('Set-cookie').match(/(SESSION_ID=.*);/)
     if (!match) {
       throw new Error('Could not retrieve session ID')
     }

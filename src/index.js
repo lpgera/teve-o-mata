@@ -14,11 +14,14 @@ if (!process.env.PASSWORD) {
 }
 
 async function feed(teveclubClient) {
-  await teveclubClient.post({ path: '/myteve.pet', data: {
-    kaja: '1',
-    pia: '1',
-    etet: 'Mehet!',
-  }})
+  await teveclubClient.post({
+    path: '/myteve.pet',
+    data: {
+      kaja: '1',
+      pia: '1',
+      etet: 'Mehet!',
+    },
+  })
 }
 
 async function teach(teveclubClient) {
@@ -35,24 +38,33 @@ async function teach(teveclubClient) {
       }
     }).get()
     const trickWithMinimumLessons = tricks.reduce((a, b) => a.lessons <= b.lessons ? a : b, {})
-    await teveclubClient.post({ path: '/tanit.pet', data: {
-      tudomany: trickWithMinimumLessons.value,
-      learn: 'Tanulj teve!',
-    }})
+    await teveclubClient.post({
+      path: '/tanit.pet',
+      data: {
+        tudomany: trickWithMinimumLessons.value,
+        learn: 'Tanulj teve!',
+      },
+    })
   } else {
     // continue learning the trick
-    await teveclubClient.post({ path: '/tanit.pet',data: {
-      farmdoit: 'tanit',
-      learn: 'Tanulj teve!',
-    }})
+    await teveclubClient.post({
+      path: '/tanit.pet',
+      data: {
+        farmdoit: 'tanit',
+        learn: 'Tanulj teve!',
+      },
+    })
   }
 }
 
 async function play(teveclubClient) {
-  await teveclubClient.post({ path: '/egyszam.pet',data: {
-    honnan: String(Math.floor(Math.random() * 200) + 1),
-    tipp: 'Ez a tippem!',
-  }})
+  await teveclubClient.post({
+    path: '/egyszam.pet',
+    data: {
+      honnan: String(Math.floor(Math.random() * 200) + 1),
+      tipp: 'Ez a tippem!',
+    },
+  })
 }
 
 async function pushTeachingInfo(teveclubClient) {
