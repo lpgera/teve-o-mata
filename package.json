@@ -11,7 +11,7 @@
   },
   "type": "module",
   "scripts": {
-    "start": "node --env-file=.env ./src/index.js"
+    "start": "node --env-file-if-exists=.env ./src/index.js"
   },
   "author": "lpgera",
   "license": "MIT",

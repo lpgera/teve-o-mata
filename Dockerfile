@@ -1,4 +1,4 @@
-FROM node:23-alpine
+FROM node:23.0.0-alpine
 
 WORKDIR /usr/src/app
 
@@ -8,4 +8,4 @@ RUN npm ci --omit=dev && npm cache clear --force
 
 COPY . .
 
-CMD ["node", "src/index.js"]
+CMD ["node", "--run", "start"]
