@@ -16,7 +16,7 @@
   "author": "lpgera",
   "license": "MIT",
   "dependencies": {
-    "cheerio": "^1.0.0",
+    "cheerio": "^1.1.0",
     "cron": "^4.3.1"
   }
 }
