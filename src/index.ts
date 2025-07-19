@@ -1,7 +1,9 @@
 import * as cheerio from 'cheerio'
 import { CronJob } from 'cron'
-import ntfy from './ntfy.js'
-import TeveclubClient from './teveclub-client.js'
+import ntfy from './ntfy.ts'
+import TeveclubClient from './teveclub-client.ts'
+
+type TeveclubClientType = ReturnType<typeof TeveclubClient>
 
 if (!process.env.NTFY_URL) {
   throw new Error('process.env.NTFY_URL is undefined')
@@ -13,7 +15,7 @@ if (!process.env.PASSWORD) {
   throw new Error('process.env.PASSWORD is undefined')
 }
 
-async function feed(teveclubClient) {
+async function feed(teveclubClient: TeveclubClientType) {
   await teveclubClient.post({
     path: '/myteve.pet',
     data: {
@@ -24,7 +26,7 @@ async function feed(teveclubClient) {
   })
 }
 
-async function teach(teveclubClient) {
+async function teach(teveclubClient: TeveclubClientType) {
   const body = await teveclubClient.get({ path: '/tanit.pet' })
 
   const $ = cheerio.load(body)
@@ -37,7 +39,9 @@ async function teach(teveclubClient) {
         lessons: Number(lessons ?? Number.MAX_SAFE_INTEGER),
       }
     }).get()
-    const trickWithMinimumLessons = tricks.reduce((a, b) => a.lessons <= b.lessons ? a : b, {})
+    const trickWithMinimumLessons = tricks.reduce((a, b) =>
+      a.lessons <= b.lessons ? a : b, tricks[0]
+    )
     await teveclubClient.post({
       path: '/tanit.pet',
       data: {
@@ -57,7 +61,7 @@ async function teach(teveclubClient) {
   }
 }
 
-async function play(teveclubClient) {
+async function play(teveclubClient: TeveclubClientType) {
   await teveclubClient.post({
     path: '/egyszam.pet',
     data: {
@@ -67,7 +71,7 @@ async function play(teveclubClient) {
   })
 }
 
-async function pushTeachingInfo(teveclubClient) {
+async function pushTeachingInfo(teveclubClient: TeveclubClientType) {
   const body = await teveclubClient.get({ path: '/tanit.pet' })
 
   const $ = cheerio.load(body)
@@ -107,7 +111,7 @@ const start = true
 
 const job = new CronJob(process.env.CRON_CONFIG || '0 0 5 * * *', run, null, start, null, null, runOnInit)
 
-const exitHandler = async (signal) => {
+const exitHandler = async (signal: NodeJS.Signals) => {
   console.log(`Received ${signal}, exiting...`)
   job.stop()
 }

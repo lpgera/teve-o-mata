@@ -1,4 +1,4 @@
-export default async (message) => {
+export default async (message: string) => {
   const response = await fetch(process.env.NTFY_URL, {
     method: 'POST',
     headers: {

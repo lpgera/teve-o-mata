@@ -6,8 +6,8 @@ const headers = {
 
 const decoder = new TextDecoder('iso-8859-1')
 
-const encodeObjectToIso8859FormData = object => {
-  const encodeIso8859 = string => {
+const encodeObjectToIso8859FormData = (object: Record<string, string>) => {
+  const encodeIso8859 = (string: string) => {
     const result = []
     for (let i = 0; i < string.length; i++) {
       const char = string.charCodeAt(i)
@@ -41,7 +41,7 @@ const url = path => new URL(path, baseUrl).toString()
 export default () => {
   let sessionCookie = null
 
-  const login = async ({ tevenev, pass }) => {
+  const login = async ({ tevenev, pass }: { tevenev: string, pass: string }) => {
     const response = await fetch(url('/'), {
       method: 'POST',
       redirect: 'manual',
@@ -71,7 +71,7 @@ export default () => {
     return decoder.decode(await response.arrayBuffer())
   }
 
-  const get = async ({ path }) => {
+  const get = async ({ path }: { path: string }) => {
     const response = await fetch(url(path), {
       method: 'GET',
       headers: {
@@ -87,7 +87,7 @@ export default () => {
     return decoder.decode(await response.arrayBuffer())
   }
 
-  const post = async ({ path, data }) => {
+  const post = async ({ path, data }: { path: string, data: Record<string, string> }) => {
     const response = await fetch(url(path), {
       method: 'POST',
       headers: {
