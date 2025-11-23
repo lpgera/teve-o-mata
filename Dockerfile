@@ -8,4 +8,4 @@ RUN npm ci --omit=dev && npm cache clear --force
 
 COPY . .
 
-CMD ["node", "--run", "start"]
+CMD ["node", "src/index.ts"]
