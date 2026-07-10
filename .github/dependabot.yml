@@ -6,7 +6,6 @@ updates:
       interval: 'daily'
     cooldown:
       default-days: 1
-    open-pull-requests-limit: 20
   - package-ecosystem: 'docker'
     directory: '/'
     schedule:
