@@ -36,10 +36,10 @@ const encodeObjectToIso8859FormData = (object: Record<string, string>) => {
     .join('&')
 }
 
-const url = path => new URL(path, baseUrl).toString()
+const url = (path: string) => new URL(path, baseUrl).toString()
 
 export default () => {
-  let sessionCookie = null
+  let sessionCookie = ''
 
   const login = async ({ tevenev, pass }: { tevenev: string, pass: string }) => {
     const response = await fetch(url('/'), {
@@ -58,11 +58,11 @@ export default () => {
       }),
     })
 
-    if (!/myteve\.pet/.test(response.headers.get('Location'))) {
+    if (!/myteve\.pet/.test(response.headers.get('Location') ?? '')) {
       throw new Error('Login was unsuccessful')
     }
 
-    const [, match] = response.headers.get('Set-cookie').match(/(SESSION_ID=.*);/)
+    const [, match] = response.headers.get('Set-cookie')?.match(/(SESSION_ID=.*);/) ?? []
     if (!match) {
       throw new Error('Could not retrieve session ID')
     }

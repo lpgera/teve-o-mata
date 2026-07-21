@@ -16,6 +16,7 @@
   "author": "lpgera",
   "license": "MIT",
   "dependencies": {
+    "@lpgera/ts-env": "^1.2.8",
     "cheerio": "^1.2.0",
     "cron": "^4.4.0"
   },

@@ -1,19 +1,13 @@
 import * as cheerio from 'cheerio'
 import { CronJob } from 'cron'
+import tsEnv from "@lpgera/ts-env"
 import ntfy from './ntfy.ts'
 import TeveclubClient from './teveclub-client.ts'
 
 type TeveclubClientType = ReturnType<typeof TeveclubClient>
 
-if (!process.env.NTFY_URL) {
-  throw new Error('process.env.NTFY_URL is undefined')
-}
-if (!process.env.LOGIN) {
-  throw new Error('process.env.LOGIN is undefined')
-}
-if (!process.env.PASSWORD) {
-  throw new Error('process.env.PASSWORD is undefined')
-}
+const login = tsEnv.stringOrThrow('LOGIN')
+const password = tsEnv.stringOrThrow('PASSWORD')
 
 async function feed(teveclubClient: TeveclubClientType) {
   await teveclubClient.post({
@@ -33,7 +27,7 @@ async function teach(teveclubClient: TeveclubClientType) {
   if ($('select[name="tudomany"]').length) {
     // select new trick to learn
     const tricks = $('select[name="tudomany"] option').map((index, element) => {
-      const [, lessons] = $(element).text().match(/\((\d+) lecke \)/)
+      const [, lessons] = $(element).text().match(/\((\d+) lecke \)/) ?? []
       return {
         value: $(element).prop('value'),
         lessons: Number(lessons ?? Number.MAX_SAFE_INTEGER),
@@ -86,15 +80,15 @@ async function pushTeachingInfo(teveclubClient: TeveclubClientType) {
     return 'Holnap új trükköt tanulhat!'
   })()
 
-  await ntfy(`${process.env.LOGIN} megetetve és tanítva. ${teachingProgressText}`)
+  await ntfy(`${login} megetetve és tanítva. ${teachingProgressText}`)
 }
 
 async function run() {
   try {
     const teveclubClient = TeveclubClient()
     await teveclubClient.login({
-      tevenev: process.env.LOGIN,
-      pass: process.env.PASSWORD,
+      tevenev: login,
+      pass: password,
     })
     await feed(teveclubClient)
     await teach(teveclubClient)
@@ -102,7 +96,11 @@ async function run() {
     await pushTeachingInfo(teveclubClient)
   } catch (error) {
     console.error(error)
-    await ntfy(error.stack)
+    if (error instanceof Error) {
+      await ntfy(error.stack ?? error.name)
+    } else {
+      await ntfy(String(error))
+    }
   }
 }
 

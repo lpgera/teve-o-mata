@@ -1,5 +1,9 @@
+import tsEnv from "@lpgera/ts-env";
+
+const ntfyUrl = tsEnv.stringOrThrow('NTFY_URL')
+
 export default async (message: string) => {
-  const response = await fetch(process.env.NTFY_URL, {
+  const response = await fetch(ntfyUrl, {
     method: 'POST',
     headers: {
       Title: 'Teve-o-mata',
