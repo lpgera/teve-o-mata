@@ -102,6 +102,10 @@ export default () => {
       throw new Error(`POST ${url(path)} failed: ${response.status} ${response.statusText}`)
     }
 
+    if (response.url.includes('nosession.pet')) {
+      throw new Error(`POST ${url(path)} failed: session error.`)
+    }
+
     return decoder.decode(await response.arrayBuffer())
   }
 
