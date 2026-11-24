@@ -18,7 +18,7 @@
   "dependencies": {
     "@lpgera/ts-env": "^1.2.8",
     "cheerio": "^1.2.0",
-    "cron": "^4.4.1"
+    "cron": "^4.4.2"
   },
   "devDependencies": {
     "@types/node": "^26.6.6"
